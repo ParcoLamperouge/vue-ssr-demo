@@ -1,7 +1,10 @@
-const Vue = require('vue')
+// const Vue = require('vue')
 const fs = require('fs')
 const path = require('path')
-const koaStatic = require('koa-static')
+const Router = require('koa-router')
+const send = require('koa-send')
+
+const router = new Router()
 
 // const Koa = require('koa')
 // const app = new Koa()
@@ -19,7 +22,7 @@ const clientManifest = require('../dist/vue-ssr-client-manifest.json')
 
 const renderer = createBundleRenderer(bundle, {
   runInNewContext: false,
-  template: fs.readFileSync(resolve('./src/index.temp.html'), 'utf-8'),
+  template: fs.readFileSync(resolve('../src/index.temp.html'), 'utf-8'),
   clientManifest,
 })
 function renderToString(context) {
@@ -41,17 +44,18 @@ const handleRequest = async (ctx, next) => {
   console.log(url)
   if (url.includes('.')) {
     console.log(`proxy ${url}`)
-    return await send(ctx, url, {root: path.resolve(__dirname,'../dist')})
+    // eslint-disable-next-line no-return-await
+    return await send(ctx, url, { root: path.resolve(__dirname, '../dist') })
   }
 
-  ctx.res.setHeader("Content-Type", "text/html");
+  ctx.res.setHeader('Content-Type', 'text/html')
   const context = {
-    title: "ssr test",
-    url
-  };
+    title: 'ssr test',
+    url,
+  }
   // 将 context 数据渲染为 HTML
-  const html = await renderToString(context);
-  ctx.body = html;
+  const html = await renderToString(context)
+  ctx.body = html
 }
 router.get('*', handleRequest)
 module.exports = router
