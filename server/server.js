@@ -41,9 +41,7 @@ function renderToString(context) {
 // 第 3 步：添加一个中间件来处理所有请求
 const handleRequest = async (ctx, next) => {
   const url = ctx.path
-  console.log(url)
   if (url.includes('.')) {
-    console.log(`proxy ${url}`)
     // eslint-disable-next-line no-return-await
     return await send(ctx, url, { root: path.resolve(__dirname, '../dist') })
   }

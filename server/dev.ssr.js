@@ -5,6 +5,7 @@ const axios = require('axios')
 const MemoryFS = require('memory-fs')
 const fs = require('fs')
 const path = require('path')
+const send = require('koa-send')
 const Router = require('koa-router')
 // 1、webpack配置文件
 const webpackConfig = require('@vue/cli-service/webpack.config')
@@ -30,31 +31,8 @@ serverCompiler.watch({}, (err, data) => {
     'vue-ssr-server-bundle.json',
   )
   bundle = JSON.parse(mfs.readFileSync(bundlePath, 'utf-8'))
-  console.log('new bundle generated')
 })
-// 处理请求
-const handleRequest = async (ctx) => {
-  if (!bundle) {
-    ctx.body = '等待webpack打包完成后在访问'
-    return
-  }
-  const url = ctx.path
-  if (url.includes('favicon.ico')){
-    console.log(`proxy ${url}`)
-    return await send(ctx, url, { root: path.resolve(__dirname, '../public') })
-  }
-  // 4、获取最新的 vue-ssr-client-manifest.json
-  const clientManifestResp = await axios.get('http://localhost:8081/vue-ssr-client-manifest.json')
-  const clientManifest = clientManifestResp.data
 
-  const renderer = createBundleRenderer(bundle, {
-    runInNewContext: false,
-    template: fs.readFileSync(path.resolve(__dirname, '../src/index.temp.html'), 'utf-8'),
-    clientManifest,
-  })
-  const html = await renderToString(ctx, renderer)
-  ctx.body = html
-}
 function renderToString(context, renderer) {
   return new Promise((res, rej) => {
     renderer.renderToString(context, (err, html) => {
@@ -68,6 +46,29 @@ function renderToString(context, renderer) {
   })
 }
 
+// 处理请求
+const handleRequest = async (ctx) => {
+  if (!bundle) {
+    ctx.body = '等待webpack打包完成后在访问'
+    return
+  }
+  const url = ctx.path
+  if (url.includes('favicon.ico')) {
+    return await send(ctx, url, { root: path.resolve(__dirname, '../public') })
+  }
+
+  // 4、获取最新的 vue-ssr-client-manifest.json
+  const clientManifestResp = await axios.get('http://localhost:8081/vue-ssr-client-manifest.json')
+  const clientManifest = clientManifestResp.data
+
+  const renderer = createBundleRenderer(bundle, {
+    runInNewContext: false,
+    template: fs.readFileSync(path.resolve(__dirname, '../src/index.temp.html'), 'utf-8'),
+    clientManifest,
+  })
+  const html = await renderToString(ctx, renderer)
+  ctx.body = html
+}
 const router = new Router()
 router.get('*', handleRequest)
 module.exports = router
