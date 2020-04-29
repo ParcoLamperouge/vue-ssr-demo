@@ -13,7 +13,8 @@ module.exports = {
   rules: {
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     "linebreak-style": [0 ,"error", "windows"],
-    'semi': ['error', 'never']
+    'semi': ['error', 'never'],
+    'no-param-reassign': ["error", { "props": false }]
   },
   overrides: [
     {

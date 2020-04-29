@@ -7,9 +7,17 @@ const merge = require('lodash.merge')
 
 const TARGET_NODE = process.env.WEBPACK_TARGET === 'node'
 const target = TARGET_NODE ? 'server' : 'client'
-
+const isDev = process.env.NODE_ENV !== 'production'
 
 module.exports = {
+  publicPath: isDev ? 'http://127.0.0.1:8081' : 'http://127.0.0.1:3000',
+  devServer: {
+    historyApiFallback: true,
+    headers: { 'Access-Control-Allow-Origin': '*' },
+  },
+  css: {
+    extract: process.env.NODE_ENV === 'production',
+  },
   configureWebpack: () => ({
   // 将 entry 指向应用程序的 server / client 文件
     entry: `./src/entry-${target}.js`,
