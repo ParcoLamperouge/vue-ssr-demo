@@ -7,7 +7,7 @@ npm install
 
 ### Compiles and hot-reloads for development
 ```
-npm run serve
+npm run dev
 ```
 
 ### Compiles and minifies for production
@@ -29,6 +29,17 @@ npm run lint
 ```
 npm run test:unit
 ```
+### Compile as server render
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+```
+npm run build:win
+node server.js
+```
+
+### Run on server
+copy folder to your server
+```
+npm install -g pm2
+npm install
+pm2 server.js
+```
